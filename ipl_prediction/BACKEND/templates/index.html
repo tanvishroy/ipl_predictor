@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL Match Winner Prediction</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="top-title">IPL Match Winner Prediction 🏆</h1>
+    
+        <form id="predictionForm">
+          <div class="form-row">
+            <label for="team1">Enter Team 1:</label>
+            <input type="text" id="team1" placeholder="e.g., CSK" required>
+          </div>
+    
+          <div class="form-row">
+            <label for="team2">Enter Team 2:</label>
+            <input type="text" id="team2" placeholder="e.g., RCB" required>
+          </div>
+    
+          <button type="submit">Predict Winner</button>
+    
+          <div id="result">
+            <h3>Predicted Winner: "<span id="winner"></span>" 🏆</h3>
+          </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(event) 
+        {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            // Get the team codes from input fields, trim spaces, and convert to uppercase for consistency
+            const team1 = document.getElementById('team1').value.trim().toUpperCase();
+            const team2 = document.getElementById('team2').value.trim().toUpperCase();
+
+            // Basic validation to ensure both team names are provided
+            if (!team1 || !team2) {
+                alert('Please enter valid team codes.');
+                return;
+            }
+            if (team1 == team2) {
+                alert('Please enter different team codes.');
+                return;
+            }
+
+            // Send a POST request to the backend API with the team names
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ team1, team2 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the predicted winner
+                if (data.winner) {
+                    document.getElementById('winner').textContent = data.winner;
+                    document.getElementById('result').style.display = 'block';  // Show the result div
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                // Display error message
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            });
+        });
+    </script>
+</body>
+</html>
