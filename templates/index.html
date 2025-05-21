@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPL Match Winner Prediction</title>
-    <!-- <link rel="stylesheet" href="style.css"> -->
 </head>
 <style>
 /* Full-screen centered layout with background */
@@ -16,10 +15,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url(static/data/bg.png);
+    background-image: url(/static/data/bg.png);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    position: relative;
 }
 
 /* Optional overlay for better contrast */
@@ -35,7 +35,7 @@ body::before {
 .container {
     position: relative;
     z-index: 1;
-    background-color: rgba(255, 255, 255, 0.718); /* semi-transparent */
+    background-color: rgba(255, 255, 255, 0.8);
     padding: 20px 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -56,7 +56,6 @@ form {
     gap: 15px;
 }
 
-/* Label beside input */
 .form-row {
     display: flex;
     align-items: center;
@@ -104,72 +103,79 @@ button:hover {
     color: #ff0000;
 }
 </style>
+
 <body>
     <div class="container">
         <h1 class="top-title">IPL Match Winner Prediction 🏆</h1>
     
         <form id="predictionForm">
-          <div class="form-row">
-            <label for="team1">Enter Team 1:</label>
-            <input type="text" id="team1" placeholder="e.g., CSK" required>
-          </div>
-    
-          <div class="form-row">
-            <label for="team2">Enter Team 2:</label>
-            <input type="text" id="team2" placeholder="e.g., RCB" required>
-          </div>
-    
-          <button type="submit">Predict Winner</button>
-    
-          <div id="result">
-            <h3>Predicted Winner: "<span id="winner"></span>" 🏆</h3>
-          </div>
+            <div class="form-row">
+                <label for="team1">Enter Team 1:</label>
+                <input type="text" id="team1" placeholder="e.g., CSK" required>
+            </div>
+
+            <div class="form-row">
+                <label for="team2">Enter Team 2:</label>
+                <input type="text" id="team2" placeholder="e.g., RCB" required>
+            </div>
+
+            <button type="submit">Predict Winner</button>
+
+            <div id="result">
+                <h3>Predicted Winner: "<span id="winner"></span>" 🏆</h3>
+            </div>
         </form>
     </div>
+
 <script>
-    
-        document.getElementById('predictionForm').addEventListener('submit', function(event) 
-        {
-            event.preventDefault(); // Prevent the default form submission behavior
+document.getElementById('predictionForm').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-            // Get the team codes from input fields, trim spaces, and convert to uppercase for consistency
-            const team1 = document.getElementById('team1').value.trim().toUpperCase();
-            const team2 = document.getElementById('team2').value.trim().toUpperCase();
+    const team1 = document.getElementById('team1').value.trim().toUpperCase();
+    const team2 = document.getElementById('team2').value.trim().toUpperCase();
 
-            // Basic validation to ensure both team names are provided
-            if (!team1 || !team2) {
-                alert('Please enter valid team codes.');
-                return;
-            }
-            if (team1 == team2) {
-                alert('Please enter different team codes.');
-                return;
-            }
+    if (!team1 || !team2) {
+        alert('Please enter valid team codes.');
+        return;
+    }
 
-            // Send a POST request to the backend API with the team names
-            fetch('http://127.0.0.1:5000/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ team1, team2 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Display the predicted winner
-                if (data.winner) {
-                    document.getElementById('winner').textContent = data.winner;
-                    document.getElementById('result').style.display = 'block';  // Show the result div
-                } else if (data.error) {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                // Display error message
-                console.error('Error:', error);
-                alert(`Error: ${error.message}`);
-            });
-        });
+    if (team1 === team2) {
+        alert('Please enter different team codes.');
+        return;
+    }
+
+    // Log for debugging
+    console.log("Sending request to Flask with teams:", team1, team2);
+
+    // Send POST request to the Flask server
+    fetch('http://127.0.0.1:5000/predict', {  // Updated URL
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ team1, team2 })
+    })
+    .then(response => {
+        console.log("Response status:", response.status); // Check response status
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.error); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Received data:", data); // Log received data
+        if (data.winner) {
+            document.getElementById('winner').textContent = data.winner;
+            document.getElementById('result').style.display = 'block';
+        } else {
+            alert('Prediction failed: No winner returned.');
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        alert(`Error: ${error.message}`);
+    });
+});
 </script>
-   </body>
+</body>
 </html>
