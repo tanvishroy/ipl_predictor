@@ -7,8 +7,18 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-model = joblib.load("models/match_winner_model.pkl")
-encoder = joblib.load("models/label_encoder.pkl")
+# Absolute paths for model and encoder
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "models", "match_winner_model.pkl")
+encoder_path = os.path.join(BASE_DIR, "models", "label_encoder.pkl")
+
+try:
+    model = joblib.load(model_path)
+    encoder = joblib.load(encoder_path)
+    print("Models loaded successfully.")
+except Exception as e:
+    print("Error loading models:", e)
+    raise
 
 @app.route('/')
 def home():
@@ -30,12 +40,13 @@ def predict():
 
         X = pd.DataFrame([[team1_enc, team2_enc]], columns=["team1_enc", "team2_enc"])
         pred_enc = model.predict(X)[0]
-        predicted_emoji = encoder.inverse_transform([pred_enc])[0]
+        predicted_winner = encoder.inverse_transform([pred_enc])[0]
 
-        return jsonify({'winner': predicted_emoji})
+        return jsonify({'winner': predicted_winner})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
