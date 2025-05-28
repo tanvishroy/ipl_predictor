@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>IPL Match Winner Prediction</title>
   <style>
-    * { box-sizing: border-box; }
+    /* Reset some default */
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -33,16 +36,19 @@
     .container {
       position: relative;
       z-index: 1;
-      background-color: rgba(255, 255, 255, 0.65);
+      background-color: rgba(255, 255, 255, 0.65); /* decreased opacity */
       padding: 20px 30px;
       border-radius: 12px;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
       width: 350px;
       max-width: 90%;
       text-align: center;
+      transition: background-color 0.3s ease;
     }
 
-    .container:hover { background-color: rgba(255, 255, 255, 0.85); }
+    .container:hover {
+      background-color: rgba(255, 255, 255, 0.85);
+    }
 
     h1.top-title {
       margin-bottom: 25px;
@@ -50,7 +56,11 @@
       font-size: 1.8rem;
     }
 
-    form { display: flex; flex-direction: column; gap: 20px; }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
     .form-row {
       display: flex;
@@ -75,7 +85,8 @@
       cursor: pointer;
     }
 
-    select:hover, select:focus {
+    select:hover,
+    select:focus {
       border-color: #007bff;
       outline: none;
     }
@@ -106,15 +117,20 @@
       font-weight: bold;
     }
 
-    #winner { color: #007bff; }
+    #winner {
+      color: #007bff;
+    }
 
+    /* Responsive adjustments */
     @media (max-width: 400px) {
       .container {
         padding: 15px 20px;
         width: 95%;
       }
 
-      h1.top-title { font-size: 1.5rem; }
+      h1.top-title {
+        font-size: 1.5rem;
+      }
 
       button {
         font-size: 16px;
@@ -126,6 +142,7 @@
 <body>
   <div class="container">
     <h1 class="top-title">IPL Match Winner Prediction 🏆</h1>
+
     <form id="predictionForm">
       <div class="form-row">
         <label for="team1">Select Team 1:</label>
@@ -186,11 +203,15 @@
         return;
       }
 
-      fetch('https://ipl-predictor-gr82.onrender.com/predict', {
+      // Replace this URL with your deployed Render app URL
+      const apiUrl = 'https://your-render-app-url.onrender.com/predict';
+
+      fetch('http://192.168.0.106:5000/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ team1, team2 })
-      })
+        })
+
       .then(response => {
         if (!response.ok) {
           return response.json().then(err => { throw new Error(err.error); });
@@ -198,8 +219,12 @@
         return response.json();
       })
       .then(data => {
-        document.getElementById('winner').textContent = data.winner;
-        document.getElementById('result').style.display = 'block';
+        if (data.winner) {
+          document.getElementById('winner').textContent = data.winner;
+          document.getElementById('result').style.display = 'block';
+        } else {
+          alert('Prediction failed: No winner returned.');
+        }
       })
       .catch(error => {
         alert(`Error: ${error.message}`);
