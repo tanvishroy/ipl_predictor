@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: your-flask-app-name
+    env: python
+    region: oregon  # or your preferred region
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    autoDeploy: true

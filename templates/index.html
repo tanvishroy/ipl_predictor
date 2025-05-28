@@ -1,181 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPL Match Winner Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IPL Match Winner Prediction</title>
+  <style>
+    /* Reset some default */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: url(/static/data/bg.png);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      background-color: rgba(255, 255, 255, 0.65); /* decreased opacity */
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      width: 350px;
+      max-width: 90%;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .container:hover {
+      background-color: rgba(255, 255, 255, 0.85);
+    }
+
+    h1.top-title {
+      margin-bottom: 25px;
+      color: #222;
+      font-size: 1.8rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 15px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1.8px solid #aaa;
+      transition: border-color 0.3s ease;
+      cursor: pointer;
+    }
+
+    select:hover,
+    select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      box-shadow: 0 6px 14px rgba(0, 86, 179, 0.6);
+    }
+
+    #result {
+      display: none;
+      margin-top: 20px;
+      font-size: 1.3rem;
+      color: #d80000;
+      font-weight: bold;
+    }
+
+    #winner {
+      color: #007bff;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 400px) {
+      .container {
+        padding: 15px 20px;
+        width: 95%;
+      }
+
+      h1.top-title {
+        font-size: 1.5rem;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
-<style>
-/* Full-screen centered layout with background */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-image: url(/static/data/bg.png);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
-}
-
-/* Optional overlay for better contrast */
-body::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 0;
-}
-
-/* Transparent box */
-.container {
-    position: relative;
-    z-index: 1;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    width: 320px;
-    text-align: center;
-}
-
-/* Title styling */
-.top-title {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-/* Form styling */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.form-row label {
-    font-size: 14px;
-    width: 100px;
-    text-align: left;
-}
-
-.form-row input {
-    flex: 1;
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-
-/* Button */
-button {
-    padding: 10px;
-    background-color: #007bff;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-/* Result */
-#result {
-    display: none;
-    margin-top: 15px;
-}
-
-#winner {
-    font-weight: bold;
-    color: #ff0000;
-}
-</style>
-
 <body>
-    <div class="container">
-        <h1 class="top-title">IPL Match Winner Prediction 🏆</h1>
-    
-        <form id="predictionForm">
-            <div class="form-row">
-                <label for="team1">Enter Team 1:</label>
-                <input type="text" id="team1" placeholder="e.g., CSK" required>
-            </div>
+  <div class="container">
+    <h1 class="top-title">IPL Match Winner Prediction 🏆</h1>
 
-            <div class="form-row">
-                <label for="team2">Enter Team 2:</label>
-                <input type="text" id="team2" placeholder="e.g., RCB" required>
-            </div>
+    <form id="predictionForm">
+      <div class="form-row">
+        <label for="team1">Select Team 1:</label>
+        <select id="team1" required>
+          <option value="" disabled selected>Select Team</option>
+          <option value="CSK">CSK</option>
+          <option value="RCB">RCB</option>
+          <option value="MI">MI</option>
+          <option value="RR">RR</option>
+          <option value="KKR">KKR</option>
+          <option value="PBKS">PBKS</option>
+          <option value="SRH">SRH</option>
+          <option value="DC">DC</option>
+          <option value="LSG">LSG</option>
+          <option value="GT">GT</option>
+        </select>
+      </div>
 
-            <button type="submit">Predict Winner</button>
+      <div class="form-row">
+        <label for="team2">Select Team 2:</label>
+        <select id="team2" required>
+          <option value="" disabled selected>Select Team</option>
+          <option value="CSK">CSK</option>
+          <option value="RCB">RCB</option>
+          <option value="MI">MI</option>
+          <option value="RR">RR</option>
+          <option value="KKR">KKR</option>
+          <option value="PBKS">PBKS</option>
+          <option value="SRH">SRH</option>
+          <option value="DC">DC</option>
+          <option value="LSG">LSG</option>
+          <option value="GT">GT</option>
+        </select>
+      </div>
 
-            <div id="result">
-                <h3>Predicted Winner: "<span id="winner"></span>" 🏆</h3>
-            </div>
-        </form>
-    </div>
+      <button type="submit">Predict Winner</button>
 
-<script>
-document.getElementById('predictionForm').addEventListener('submit', function(event) {
-    event.preventDefault();
+      <div id="result">
+        Predicted Winner: "<span id="winner"></span>" 🏆
+      </div>
+    </form>
+  </div>
 
-    const team1 = document.getElementById('team1').value.trim().toUpperCase();
-    const team2 = document.getElementById('team2').value.trim().toUpperCase();
+  <script>
+    document.getElementById('predictionForm').addEventListener('submit', function(event) {
+      event.preventDefault();
 
-    if (!team1 || !team2) {
-        alert('Please enter valid team codes.');
+      const team1 = document.getElementById('team1').value;
+      const team2 = document.getElementById('team2').value;
+
+      if (!team1 || !team2) {
+        alert('Please select both teams.');
         return;
-    }
+      }
 
-    if (team1 === team2) {
-        alert('Please enter different team codes.');
+      if (team1 === team2) {
+        alert('Please select two different teams.');
         return;
-    }
+      }
 
-    // Log for debugging
-    console.log("Sending request to Flask with teams:", team1, team2);
+      // Replace this URL with your deployed Render app URL
+      const apiUrl = 'https://your-render-app-url.onrender.com/predict';
 
-    // Send POST request to the Flask server
-    fetch('http://127.0.0.1:5000/predict', {  // Updated URL
+      fetch('http://192.168.0.106:5000/predict', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ team1, team2 })
-    })
-    .then(response => {
-        console.log("Response status:", response.status); // Check response status
+        })
+
+      .then(response => {
         if (!response.ok) {
-            return response.json().then(err => { throw new Error(err.error); });
+          return response.json().then(err => { throw new Error(err.error); });
         }
         return response.json();
-    })
-    .then(data => {
-        console.log("Received data:", data); // Log received data
+      })
+      .then(data => {
         if (data.winner) {
-            document.getElementById('winner').textContent = data.winner;
-            document.getElementById('result').style.display = 'block';
+          document.getElementById('winner').textContent = data.winner;
+          document.getElementById('result').style.display = 'block';
         } else {
-            alert('Prediction failed: No winner returned.');
+          alert('Prediction failed: No winner returned.');
         }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
+      })
+      .catch(error => {
         alert(`Error: ${error.message}`);
+        document.getElementById('result').style.display = 'none';
+      });
     });
-});
-</script>
+  </script>
 </body>
 </html>

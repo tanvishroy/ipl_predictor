@@ -2,20 +2,18 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import joblib
 import pandas as pd
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Load the saved model and label encoder
 model = joblib.load("models/match_winner_model.pkl")
 encoder = joblib.load("models/label_encoder.pkl")
 
-# Home route - serves the frontend HTML
 @app.route('/')
 def home():
     return render_template('index.html')
 
-# Prediction route
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
@@ -40,4 +38,4 @@ def predict():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
